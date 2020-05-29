@@ -1,0 +1,4 @@
+rootProject.name='TestCCAndVirtualApk'
+include ':app'
+include ':component_plugin'
+include ':component_base'
