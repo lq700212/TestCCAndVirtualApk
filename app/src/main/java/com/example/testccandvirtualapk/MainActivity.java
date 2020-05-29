@@ -3,6 +3,7 @@ package com.example.testccandvirtualapk;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -13,7 +14,10 @@ import android.widget.Toast;
 
 import com.billy.cc.core.component.CC;
 import com.billy.cc.core.component.CCResult;
+import com.didi.virtualapk.PluginManager;
 import com.example.component_base.ComponentConst;
+
+import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,14 +34,25 @@ public class MainActivity extends AppCompatActivity {
         bt_to_plugin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //同步调用，直接返回结果
-                CCResult result = CC.obtainBuilder(ComponentConst.Component_plugin.NAME)
-                        .setActionName(ComponentConst.Component_plugin.Action.SHOW_ACTIVITY)
-                        .build()
-                        .call();
-                if(!result.isSuccess()){
-                    Toast.makeText(MainActivity.this, "跳转失败,code = " + result.getCode() +
-                            ", description = " + result.getErrorMessage(), Toast.LENGTH_SHORT).show();
+                try {
+                    String pluginPath = Environment.getExternalStorageDirectory().getAbsolutePath().concat("/Plugin.apk");
+                    File plugin = new File(pluginPath);
+                    PluginManager.getInstance(MainActivity.this).loadPlugin(plugin);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                if (PluginManager.getInstance(MainActivity.this).getLoadedPlugin("com.example.component_plugin") == null) {
+                    Toast.makeText(getApplicationContext(), "未加载插件", Toast.LENGTH_SHORT).show();
+                } else {
+                    //同步调用，直接返回结果
+                    CCResult result = CC.obtainBuilder(ComponentConst.Component_plugin.NAME)
+                            .setActionName(ComponentConst.Component_plugin.Action.SHOW_ACTIVITY)
+                            .build()
+                            .call();
+                    if(!result.isSuccess()){
+                        Toast.makeText(MainActivity.this, "跳转失败,code = " + result.getCode() +
+                                ", description = " + result.getErrorMessage(), Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         });
